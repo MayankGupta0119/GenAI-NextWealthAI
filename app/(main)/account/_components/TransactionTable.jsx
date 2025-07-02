@@ -95,6 +95,7 @@ const TransactionTable = ({ transactions }) => {
                 );
               })
             )}
+            <div></div>
           </TableBody>
         </Table>
       </div>
