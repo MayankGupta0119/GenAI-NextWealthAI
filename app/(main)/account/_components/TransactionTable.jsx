@@ -91,6 +91,9 @@ const TransactionTable = ({ transactions }) => {
                       {transaction.type === "EXPENSE" ? "-" : "+"}
                       Rs {transaction.amount.toFixed(2)}
                     </TableCell>
+                    <TableCell>
+                      {transaction.isRecurring ? () : ()}
+                    </TableCell>
                   </TableRow>
                 );
               })
