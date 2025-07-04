@@ -52,7 +52,7 @@ export async function updateDefaultAccount(accountId) {
 
 export async function getAccountsWithTransactions(accountId) {
   try {
-    console.log("Getting account with ID:", accountId); // Debug log
+    // console.log("Getting account with ID:", accountId); // Debug log
 
     const { userId } = await auth();
     if (!userId) {
@@ -76,9 +76,9 @@ export async function getAccountsWithTransactions(accountId) {
           orderBy: { date: "desc" },
         },
         _count: {
-          select:{
-            transactions:true
-          }
+          select: {
+            transactions: true,
+          },
         },
       },
     });
@@ -97,5 +97,76 @@ export async function getAccountsWithTransactions(accountId) {
     throw new Error(
       `Failed to get accounts with transactions: ${error.message || error}`
     );
+  }
+}
+
+export async function bulkDeleteTransactions(transactionIds) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
+    const user = await db.user.findUnique({
+      where: {
+        clerkUserId: userId,
+      },
+    });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const transactions = await db.transaction.findMany({
+      where: {
+        id: { in: transactionIds },
+        userId: user.id,
+      },
+    });
+
+    const accountBalanceChanges = transactions.reduce((acc, transaction) => {
+      let amount = transaction.amount;
+      if (typeof amount === "string") {
+        amount = parseFloat(amount);
+      }
+      if (isNaN(amount)) {
+        // Skip this transaction if amount is invalid
+        return acc;
+      }
+      const change = transaction.type === "EXPENSE" ? amount : -amount;
+
+      acc[transaction.accountId] =
+        Number(acc[transaction.accountId] || 0) + Number(change);
+      return acc;
+    }, {});
+
+    //delete transaction and update account balance in a transaction
+    await db.$transaction(async (prisma) => {
+      // Delete transactions
+      await prisma.transaction.deleteMany({
+        where: { id: { in: transactionIds }, userId: user.id },
+      });
+
+      // Update account balances
+      for (const [accountId, balanceChange] of Object.entries(
+        accountBalanceChanges
+      )) {
+        await prisma.account.update({
+          where: { id: accountId, userId: user.id },
+          data: {
+            balance: {
+              increment: balanceChange,
+            },
+          },
+        });
+      }
+    });
+    revalidatePath("/dashboard");
+    revalidatePath("/account/[id]");
+    return { success: true, message: "Transactions deleted successfully" };
+  } catch (error) {
+    console.log(error.message);
+    console.log(error);
+    console.error("Error in bulkDeleteTransactions:", error);
+    throw new Error(`Failed to delete transactions: ${error.message || error}`);
   }
 }
