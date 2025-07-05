@@ -1,12 +1,5 @@
 "use client";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -21,7 +14,7 @@ import {
   BarChart,
   CartesianGrid,
   Legend,
-  Rectangle,
+  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -36,6 +29,9 @@ const DATE_RANGES = {
   ALL: { label: "All time", days: null },
 };
 const AccountChart = ({ transactions }) => {
+  console.log("Transactions received:", transactions?.length);
+  console.log("Sample transaction:", transactions?.[0]);
+
   const [dateRange, setDateRange] = useState("1M");
   const filteredData = useMemo(() => {
     const range = DATE_RANGES[dateRange];
@@ -43,29 +39,35 @@ const AccountChart = ({ transactions }) => {
     const startDate = range.days
       ? startOfDay(subDays(now, range.days))
       : startOfDay(new Date(0));
-    //filter all transactions within the date range
+    // filter all transactions within the date range
     const filtered = transactions.filter(
       (t) => new Date(t.date) >= startDate && new Date(t.date) <= endOfDay(now)
     );
 
-    //group by date and sum the amounts
+    // group by date (YYYY-MM-DD) and sum the amounts
     const grouped = filtered.reduce((acc, transaction) => {
-      const date = format(new Date(transaction.date), "MMM dd");
-      if (!acc[date]) {
-        acc[date] = { date, income: 0, expense: 0 };
+      const dateObj = new Date(transaction.date);
+      const dateKey = dateObj.toISOString().slice(0, 10); // "YYYY-MM-DD"
+      if (!acc[dateKey]) {
+        acc[dateKey] = {
+          date: format(dateObj, "MMM dd"), // for display
+          sortDate: dateKey, // for sorting
+          income: 0,
+          expense: 0,
+        };
       }
       if (transaction.type === "INCOME") {
-        acc[date].income += transaction.amount;
+        acc[dateKey].income += transaction.amount;
       } else {
-        acc[date].expense += transaction.amount;
+        acc[dateKey].expense += transaction.amount;
       }
       return acc;
     }, {});
 
-    //convert to array and sort by date
-    return Object.values(grouped).sort((a, b) => {
-      return new Date(a.date) - new Date(b.date);
-    });
+    // convert to array and sort by sortDate
+    return Object.values(grouped).sort((a, b) =>
+      a.sortDate.localeCompare(b.sortDate)
+    );
   }, [transactions, dateRange]);
   // console.log("filtered Data ==>", filteredData);
   //calculate total income and expense for that particular date range
@@ -126,39 +128,37 @@ const AccountChart = ({ transactions }) => {
             </p>
           </div>
         </div>
-        <div className="h-[300px]">
-          <BarChart
-            data={filteredData}
-            margin={{
-              top: 10,
-              right: 10,
-              left: 10,
-              bottom: 0,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" vertical={"false"} />
-            <XAxis dataKey="date" />
-            <YAxis
-              fontSize={12}
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={(value) => `Rs${value}`}
-            />
-            <Tooltip />
-            <Legend />
-            <Bar
-              dataKey="income"
-              name={"Income"}
-              fill="#8884d8"
-              radius={[4,4,0,0]}
-            />
-            <Bar
-              dataKey="expense"
-              name={"Expense"}    
-              fill="#82ca9d"
-              radius={[4,4,0,0]}
-            />
-          </BarChart>
+        <div className="h-[300px] ">
+          <ResponsiveContainer width={"100%"} height="100%">
+            <BarChart
+              data={filteredData}
+              margin={{ top: 10, right: 10, left: 10, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" vertical={"false"} />
+              <XAxis dataKey="date" />
+              <YAxis
+                fontsize={12}
+                tickline={false}
+                axisline={false}
+                tickFormatter={(value) => `Rs${value}`}
+              />
+              <Tooltip formatter={(value) => [`Rs. ${value}`, undefined]} />
+              <Legend />
+              <Bar
+                dataKey="income"
+                name={"Income"}
+                fill="#22c55e"
+                radius={[4, 4, 0, 0]}
+              />
+
+              <Bar
+                dataKey="expense"
+                name={"Expense"}
+                fill="#ef4444"
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>
