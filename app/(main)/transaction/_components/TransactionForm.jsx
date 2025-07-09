@@ -26,6 +26,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import ReceiptScanner from "./ReceiptScanner";
 
 const TransactionForm = ({ accounts, categories }) => {
   const {
@@ -60,6 +61,7 @@ const TransactionForm = ({ accounts, categories }) => {
   const type = watch("type");
   const isRecurring = watch("isRecurring");
   const date = watch("date");
+  const categoryValue = watch("category");
 
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
@@ -81,15 +83,59 @@ const TransactionForm = ({ accounts, categories }) => {
       router.push(`/account/${transactionResult.data.accountId}`);
     }
   }, [transactionResult, transactionLoading]);
+
+  const handleScanComplete = (scannedData) => {
+    console.log("Scanned data:", scannedData);
+    if (scannedData) {
+      setValue("amount", scannedData.amount.toString());
+      setValue("date", new Date(scannedData.date));
+      if (scannedData.description) {
+        setValue("description", scannedData.description);
+      }
+
+      if (scannedData.category) {
+        // Debug what's being searched
+        console.log("Looking for category:", scannedData.category);
+        console.log(
+          "Available categories:",
+          categories.map((c) => ({ id: c.id, name: c.name, type: c.type }))
+        );
+
+        // Find matching category by NAME (not ID)
+        const matchingCategory = categories.find(
+          (cat) =>
+            cat.name.toLowerCase() === scannedData.category.toLowerCase() ||
+            cat.id.toLowerCase() === scannedData.category.toLowerCase()
+        );
+
+        console.log("Found matching category:", matchingCategory);
+
+        if (matchingCategory) {
+          // First set the transaction type to ensure the category will be in the filtered list
+          setValue("type", matchingCategory.type);
+          // Then set the category
+          setValue("category", matchingCategory.id);
+
+          console.log(
+            "Set category to:",
+            matchingCategory.id,
+            "and type to:",
+            matchingCategory.type
+          );
+        }
+      }
+    }
+  };
   return (
     <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
       {/* AI receipt Scanner */}
+      <ReceiptScanner onScanComplete={handleScanComplete} />
 
       <div className="space-y-2">
         <label className="text-sm font-medium">Type</label>
         <Select
           onValueChange={(value) => setValue("type", value)}
-          defaultValue={type}
+          value={type} // Already using watch("type")
         >
           <SelectTrigger>
             <SelectValue placeholder="Select Type" />
@@ -156,7 +202,7 @@ const TransactionForm = ({ accounts, categories }) => {
         <label className="text-sm font-medium">Category</label>
         <Select
           onValueChange={(value) => setValue("category", value)}
-          defaultValue={getValues("category")}
+          value={categoryValue} // This will update when setValue is called
         >
           <SelectTrigger>
             <SelectValue placeholder="Select Category" />
