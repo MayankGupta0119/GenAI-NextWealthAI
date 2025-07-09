@@ -35,7 +35,7 @@ export async function createTransaction(data) {
       throw new Error("Account not found");
     }
     const balanceChange = data.type === "EXPENSE" ? -data.amount : data.amount;
-    const newBalance = accout.balance.toNumber() + balanceChange;
+    const newBalance = account.balance.toNumber() + balanceChange;
     const transaction = await db.$transaction(async (tx) => {
       const newTransaction = await tx.transaction.create({
         data: {
@@ -56,7 +56,13 @@ export async function createTransaction(data) {
     revalidatePath("/dashboard");
     revalidatePath(`/account/${transaction.accountId}`);
     return { success: true, data: serializeAmount(transaction) };
-  } catch (error) {}
+  } catch (error) {
+    console.error("Transaction error:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to create transaction",
+    };
+  }
 }
 
 function calculateNextRecurringDate(startDate, interval) {

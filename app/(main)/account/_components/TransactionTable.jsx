@@ -410,7 +410,7 @@ const TransactionTable = ({ transactions }) => {
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             className="text-destructive"
-                            onClick={() => deleteFn(transaction.id)}
+                            onClick={() => deleteFn([transaction.id])} // Pass as an array with one item
                           >
                             Delete
                           </DropdownMenuItem>
