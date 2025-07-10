@@ -1,4 +1,5 @@
 import { getDashBoardData, getUserAccounts } from "@/actions/dashboard";
+import { checkUser } from "@/lib/checkuser"; // Add this import
 import CreateAccountDrawer from "@/components/CreateAccountDrawer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
@@ -9,8 +10,11 @@ import BudgetProgress from "./_components/BudgetProgress";
 import DashOverview from "./_components/DashOverview";
 
 const DashboardPage = async () => {
+  // First, make sure the user exists in the database
+  const user = await checkUser();
+
+  // Now fetch accounts and other data
   const accounts = await getUserAccounts();
-  // console.log(accounts);
   const defaultAccount = accounts.find((account) => account.isDefault);
   let budgetData = null;
   if (defaultAccount) {
