@@ -1,36 +1,185 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🚀 NextWealthAI
 
-## Getting Started
+![NextWealthAI Logo](./public/logo1.png)
 
-First, run the development server:
+> **AI-powered financial assistant** to track, analyze & optimize your money.
+
+[![Next.js](https://img.shields.io/badge/Next.js-15-blue?logo=nextdotjs)](https://nextjs.org/)
+[![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3.3-38B2AC?logo=tailwindcss)](https://tailwindcss.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?logo=postgresql)](https://www.postgresql.org/)
+[![Clerk](https://img.shields.io/badge/Auth-Clerk-3D4CE8?logo=clerk)](https://clerk.com/)
+[![Google Gemini](https://img.shields.io/badge/AI-Gemini-ff6b81?logo=google)](https://deepmind.google/technologies/gemini/)
+[![License](https://img.shields.io/github/license/MayankGupta0119/GenAI-NextWealthAI)](./LICENSE)
+
+---
+
+## ✨ Overview
+
+**NextWealthAI** is a full-stack Next.js application designed to manage your finances smartly.  
+It enables you to:
+
+✅ Track multiple accounts & transactions  
+✅ Visualize spending trends with interactive charts  
+✅ Scan receipts with Google Gemini AI  
+✅ Manage budgets & set up recurring expenses  
+✅ Receive personalized insights & email notifications
+
+---
+
+## 📚 Table of Contents
+
+- [🚀 Overview](#-overview)
+- [🔥 Features](#-features)
+- [🛠️ Tech Stack](#-tech-stack)
+- [📁 Project Structure](#-project-structure)
+- [🚀 Getting Started](#-getting-started)
+- [☁️ Deployment](#️-deployment)
+- [🤝 Contributing](#-contributing)
+- [📜 License](#-license)
+
+---
+
+## 🔥 Features
+
+### 🏦 Account & Transaction Management
+- Create, edit & delete accounts (`/app/(main)/account`)
+- Log, filter & sort transactions in [`TransactionTable.jsx`](app/(main)/account/_components/TransactionTable.jsx)
+- Set a default account with the toggle in [`AccountCard.jsx`](app/(main)/dashboard/_components/AccountCard.jsx)
+
+### 📊 Dashboard & Analytics
+- Recent transaction overview in [`DashOverview.jsx`](app/(main)/dashboard/_components/DashOverview.jsx)
+- Monthly expense pie chart powered by **Recharts**
+- Budget progress bar charts in [`BudgetProgress.tsx`](app/(main)/budget/_components/BudgetProgress.tsx)
+
+### 🤖 AI Tools
+- **Receipt Scanner:** Upload receipts; [`scanReceipt`](actions/transaction.js) extracts amount, date, merchant & category.
+- **Auto-Categorization:** Maps AI-suggested categories to your IDs in [`TransactionForm.jsx`](app/(main)/transaction/_components/TransactionForm.jsx)
+
+### 🔄 Recurring Transactions
+- Schedule daily, weekly, monthly or yearly payments with [`transactionSchema`](app/lib/schema.js)
+- Compute next recurrence via [`calculateNextRecurringDate`](lib/utils.ts)
+
+### 🔔 Notifications & Emails
+- Email confirmations with Resend in [`emails/template.jsx`](emails/template.jsx)
+- In-app toasts using **Sonner**
+
+### 🔒 Security & Rate Limiting
+- Auth & user management via **Clerk**
+- Simple in-memory rate limiter in [`lib/inngest/arcjet.js`] (max 10 transactions/day)
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer        | Tech Stack                                           |
+| ------------ | ---------------------------------------------------- |
+| **Framework**| Next.js 15 (App Router)                              |
+| **UI**       | Tailwind CSS, Radix-UI, Lucide Icons                 |
+| **Database** | PostgreSQL, Prisma ORM [`schema.prisma`](prisma/schema.prisma) |
+| **Auth**     | Clerk                                                |
+| **AI**       | Google Generative AI (Gemini)                        |
+| **Email**    | React Email, Resend                                  |
+| **Jobs**     | Inngest                                              |
+| **Charts**   | Recharts                                             |
+| **Utils**    | `clsx`, `tailwind-merge`                             |
+
+---
+
+## 📁 Project Structure
+
+```
+.
+├── app/
+│   ├── (main)/
+│   │   ├── account/
+│   │   ├── dashboard/
+│   │   ├── budget/
+│   │   └── transaction/
+│   └── layout.tsx
+├── components/
+├── emails/
+├── lib/
+├── prisma/
+│   └── schema.prisma
+├── public/
+├── actions/
+├── package.json
+└── next.config.js
+```
+
+---
+
+## 🚀 Getting Started
+
+### 1️⃣ Clone & Install
+
+```bash
+git clone https://github.com/MayankGupta0119/GenAI-NextWealthAI.git
+cd GenAI-NextWealthAI/wealth_ai
+npm install
+```
+
+---
+
+### 2️⃣ Setup Environment
+
+Create a `.env` file and update:
+
+```bash
+DATABASE_URL="postgresql://..."
+DIRECT_URL="postgresql://..."
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=...
+CLERK_SECRET_KEY=...
+GEMINI_API_KEY=...
+RESEND_API_KEY=...
+```
+
+---
+
+### 3️⃣ Database
+
+```bash
+npx prisma migrate dev
+npx prisma generate
+```
+
+---
+
+### 4️⃣ Run Locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## ☁️ Deployment (Vercel)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Add your environment variables in the Vercel dashboard.
 
-## Learn More
+- Ensure your `package.json` contains:
 
-To learn more about Next.js, take a look at the following resources:
+```json
+"scripts": {
+  "build": "prisma generate && next build",
+  "postinstall": "prisma generate"
+}
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🤝 Contributing
 
-## Deploy on Vercel
+1. Fork & clone this repo.
+2. Create a feature branch:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+git checkout -b feature/your-feature
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. Commit & push your code.
+4. Open a **Pull Request**.
+
+✅ Please follow existing code style & run `npm run lint` before submitting.
+
+---
