@@ -2,69 +2,71 @@
 import Link from "next/link";
 import React from "react";
 import { Button } from "./ui/button";
-import BannerImage from "@/public/banner.jpg";
 import Image from "next/image";
-const splitText = (text) =>
-  text.split("").map((char, i) =>
-    char === " " ? (
-      <span
-        key={i}
-        style={{ "--i": i }}
-        className="bg-gradient-to-r from-green-400 via-green-500 to-purple-600 bg-clip-text text-transparent"
-      >
-        {"\u00A0"}
-      </span>
-    ) : (
-      <span
-        key={i}
-        style={{ "--i": i }}
-        className="bg-gradient-to-r from-[#11998E]  to-[#38EF7D] bg-clip-text text-transparent"
-      >
-        {char}
-      </span>
-    )
-  );
+import { CircleDollarSign, Info, ShieldCheck } from "lucide-react";
+
 const Hero = () => {
   return (
-    <div className="pb-20 px-4">
-      <div className="container mx-auto text-center">
-        <h1 className="split-text text-5xl md:text-7xl lg:text-[86px] font-extrabold tracking-normal pr-2 pb-2">
-          {splitText("Manage Your Finances With AI-Powered Insights")}
-        </h1>
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-8">
-          <div>
-            <Image
-              src={BannerImage}
-              alt="Banner"
-              className="  w-[650px] max-w-full h-150"
-            />
+    <div className="container mx-auto px-4 max-w-7xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        {/* Left side content */}
+        <div className="space-y-5">
+          {/* Main heading */}
+          <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+            <span className="bg-gradient-to-r from-[#11998E] to-[#38EF7D] bg-clip-text text-transparent">
+              Manage Your Finances,
+            </span>
+            <br />
+            Your Expenses with AI
+          </h1>
+
+          {/* Description paragraph */}
+          <p className="text-gray-600 text-lg">
+            An AI-powered financial assistant to help you track, analyze, and
+            optimize your financial health. Track your expenses, investments,
+            and savings with ease.
+          </p>
+
+          {/* Legal information section */}
+          <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+            <div className="flex items-start gap-4">
+              <div className="bg-green-100 p-2 rounded-full">
+                <ShieldCheck className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-800">Legal Information</h3>
+                <p className="text-gray-600 text-sm mt-1">
+                  Your data is securely stored and encrypted. We never share
+                  your financial information with third parties.
+                </p>
+              </div>
+            </div>
           </div>
+
+          {/* CTA button */}
           <div>
-            {/* <p
-              className="text-2xl text-gray-700 mb-8 max-w-2xl mx-auto leading-relaxed font-semibold tracking-wide text-center md:text-left md:leading-relaxed md:pr-8 lg:pr-16 lg:text-3xl lg:leading-snug lg:max-w-xl lg:mx-0 lg:tracking-normal lg:font-normal md:font-semibold md:tracking-normal  md:max-w-lg md:mx-auto lg:py-0 lg:text-left  lg:text-gray-800  lg:px-4 
-            "
-            >
-              {" "}
-              An AI Powered Financial Assistant to help you track, analyze, and
-              optimize your financial health.
-              <br />
-              Track your expenses, investments, and savings with ease.
-            </p> */}
-            
+            <Link href="/dashboard">
+              <Button className="bg-green-600 hover:bg-green-700 text-white px-8 py-2 rounded-md cursor-pointer">
+                Get Started
+              </Button>
+            </Link>
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4 mt-8">
-          <Link href="/dashboard">
-            <Button className="px-8 cursor-pointer" size="lg">
-              Get Started
-            </Button>
-          </Link>
-          <Link href="/dashboard">
-            <Button className="px-8 cursor-pointer" size="lg">
-              Watch Demo
-            </Button>
-          </Link>
+        {/* Right side - Image instead of placeholder */}
+        <div className="hidden md:block relative h-[500px] rounded-2xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-green-50/30 mix-blend-overlay z-10 rounded-2xl"></div>
+          <Image
+            src="/right_side.jpeg"
+            alt="Financial management illustration"
+            fill
+            className="object-cover rounded-2xl"
+            style={{
+              objectFit: "contain",
+              backgroundBlendMode: "soft-light",
+            }}
+            priority
+          />
         </div>
       </div>
     </div>

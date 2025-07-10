@@ -62,7 +62,9 @@ const CreateAccountDrawer = ({ children }) => {
     }
   }, [newAccount, createAccountLoading]);
   useEffect(() => {
-    toast.error(error?.message || "An error occurred while creating account");
+    if (error) {
+      toast.error(error.message || "An error occurred while creating account");
+    }
   }, [error]);
   return (
     <Drawer open={open} onOpenChange={setOpen}>
