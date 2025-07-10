@@ -39,6 +39,7 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
+  Loader2,
   MoreHorizontal,
   RefreshCcw,
   Search,
@@ -67,6 +68,7 @@ const TransactionTable = ({ transactions }) => {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
+  const [editingId, setEditingId] = useState(null);
 
   const {
     loading: deleteLoading,
@@ -175,6 +177,10 @@ const TransactionTable = ({ transactions }) => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, typeFilter, recurringFilter, sortConfig]);
+  const handleEditClick = (id) => {
+    setEditingId(id);
+    router.push(`/transaction/create?edit=${id}`);
+  };
   return (
     <div className="space-y-4">
       {deleteLoading && <BarLoader className="mt-4" width={"100%"} />}
@@ -222,8 +228,13 @@ const TransactionTable = ({ transactions }) => {
                   handleBlukDelete();
                 }}
                 className={"cursor-pointer"}
+                disabled={deleteLoading}
               >
-                <Trash className="h-4 w-4" />
+                {deleteLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Trash className="h-4 w-4 mr-2" />
+                )}
                 Delete Selected ({sellectedIds.length})
               </Button>
             </div>
@@ -398,21 +409,37 @@ const TransactionTable = ({ transactions }) => {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                           <DropdownMenuLabel
-                            onClick={() =>
-                              router.push(
-                                `/transaction/create?edit=${transaction.id}`
-                              )
-                            }
-                            className={" cursor-pointer"}
+                            onClick={() => handleEditClick(transaction.id)}
+                            className={"cursor-pointer flex items-center"}
+                            disabled={editingId === transaction.id}
                           >
-                            Edit
+                            {editingId === transaction.id ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                Editing...
+                              </>
+                            ) : (
+                              "Edit"
+                            )}
                           </DropdownMenuLabel>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => deleteFn([transaction.id])} // Pass as an array with one item
+                            className="text-destructive flex items-center"
+                            onClick={() => deleteFn([transaction.id])}
+                            disabled={
+                              deleteLoading &&
+                              sellectedIds.includes(transaction.id)
+                            }
                           >
-                            Delete
+                            {deleteLoading &&
+                            sellectedIds.includes(transaction.id) ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                Deleting...
+                              </>
+                            ) : (
+                              "Delete"
+                            )}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -430,10 +457,15 @@ const TransactionTable = ({ transactions }) => {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+          onClick={() => {
+            setCurrentPage((p) => Math.max(1, p - 1));
+          }}
           disabled={currentPage === 1}
           className={"cursor-pointer"}
         >
+          {currentPage > 1 && currentPage === totalPages ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          ) : null}
           Previous
         </Button>
         <span>
@@ -442,10 +474,15 @@ const TransactionTable = ({ transactions }) => {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+          onClick={() => {
+            setCurrentPage((p) => Math.min(totalPages, p + 1));
+          }}
           className={"cursor-pointer"}
           disabled={currentPage === totalPages}
         >
+          {currentPage < totalPages && currentPage === 1 ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          ) : null}
           Next
         </Button>
       </div>

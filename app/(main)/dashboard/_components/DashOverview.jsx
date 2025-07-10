@@ -79,10 +79,11 @@ const DashOverview = ({ accounts, transactions }) => {
             Recent Transactions
           </CardTitle>
           <Select
+            className="cursor-pointer"
             value={selectedAccountId}
             onValueChange={setSelectedAccountId}
           >
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="w-[150px] cursor-pointer">
               <SelectValue placeholder="Select Account" />
             </SelectTrigger>
             <SelectContent>
