@@ -1,5 +1,5 @@
 "use client";
-import { createTransaction } from "@/actions/transaction";
+import { createTransaction, updateTransaction } from "@/actions/transaction";
 import { transactionSchema } from "@/app/lib/schema";
 import CreateAccountDrawer from "@/components/CreateAccountDrawer";
 import { Button } from "@/components/ui/button";
@@ -22,13 +22,21 @@ import useFetch from "@/hooks/use_fetch";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { CalendarRange } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import ReceiptScanner from "./ReceiptScanner";
+import { tr } from "date-fns/locale";
 
-const TransactionForm = ({ accounts, categories }) => {
+const TransactionForm = ({
+  accounts,
+  categories,
+  editMode = flase,
+  initialData = null,
+}) => {
+  const searchParams = useSearchParams();
+  const editId = searchParams?.get("edit");
   const {
     register,
     setValue,
@@ -39,15 +47,29 @@ const TransactionForm = ({ accounts, categories }) => {
     reset,
   } = useForm({
     resolver: zodResolver(transactionSchema),
-    defaultValues: {
-      type: "EXPENSE",
-      amount: "",
-      description: "",
-      date: new Date(),
-      accountId: accounts.find((acc) => acc.isDefault)?.id,
-      isRecurring: false,
-      recurringInterval: "MONTHLY",
-    },
+    defaultValues:
+      editMode && initialData
+        ? {
+            type: initialData.type,
+            amount: initialData.amount.toString(),
+            description: initialData.description || "",
+            date: new Date(initialData.date),
+            accountId: initialData.accountId,
+            isRecurring: initialData.isRecurring || false,
+            category: initialData.categoryId || "",
+            ...(initialData.recurringInterval && {
+              recurringInterval: initialData.recurringInterval,
+            }),
+          }
+        : {
+            type: "EXPENSE",
+            amount: "",
+            description: "",
+            date: new Date(),
+            accountId: accounts.find((acc) => acc.isDefault)?.id,
+            isRecurring: false,
+            recurringInterval: "MONTHLY",
+          },
   });
 
   const router = useRouter();
@@ -56,7 +78,7 @@ const TransactionForm = ({ accounts, categories }) => {
     loading: transactionLoading,
     fn: transactionFn,
     data: transactionResult,
-  } = useFetch(createTransaction);
+  } = useFetch(editMode ? updateTransaction : createTransaction);
 
   const type = watch("type");
   const isRecurring = watch("isRecurring");
@@ -74,15 +96,23 @@ const TransactionForm = ({ accounts, categories }) => {
       ...data,
       amount: parseFloat(data.amount),
     };
-    transactionFn(formData);
+    if (editMode) {
+      transactionFn(editId, formData);
+    } else {
+      transactionFn(formData);
+    }
   };
   useEffect(() => {
     if (transactionResult && transactionResult.success && !transactionLoading) {
-      toast.success("Transaction created successfully");
+      toast.success(
+        editMode
+          ? "Transaction Updated Successfully"
+          : "Transaction created successfully"
+      );
       reset();
       router.push(`/account/${transactionResult.data.accountId}`);
     }
-  }, [transactionResult, transactionLoading]);
+  }, [transactionResult, transactionLoading, editMode]);
 
   const handleScanComplete = (scannedData) => {
     console.log("Scanned data:", scannedData);
@@ -129,7 +159,7 @@ const TransactionForm = ({ accounts, categories }) => {
   return (
     <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
       {/* AI receipt Scanner */}
-      <ReceiptScanner onScanComplete={handleScanComplete} />
+      {!editMode && <ReceiptScanner onScanComplete={handleScanComplete} />}
 
       <div className="space-y-2">
         <label className="text-sm font-medium">Type</label>
@@ -328,8 +358,17 @@ const TransactionForm = ({ accounts, categories }) => {
         <Button type="button" variant={"outline"} onClick={() => router.back()}>
           Cancel
         </Button>
-        <Button type="submit" disabled={transactionLoading}>
-          Create Transaction
+        <Button
+          type="submit"
+          className="cursor-pointer"
+          disabled={transactionLoading}
+        >
+          {transactionLoading
+            ? "Processing..."
+            : editMode
+              ? "Update Transaction"
+              : "Create Transaction"}
+          {/* Show loading state */}
         </Button>
       </div>
     </form>

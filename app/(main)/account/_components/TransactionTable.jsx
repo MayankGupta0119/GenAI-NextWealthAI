@@ -400,7 +400,7 @@ const TransactionTable = ({ transactions }) => {
                           <DropdownMenuLabel
                             onClick={() =>
                               router.push(
-                                `/transactions/create?edit=${transaction.id}`
+                                `/transaction/create?edit=${transaction.id}`
                               )
                             }
                             className={" cursor-pointer"}
