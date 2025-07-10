@@ -106,13 +106,13 @@ const AccountChart = ({ transactions }) => {
           <div className="text-center">
             <p className="text-muted-foreground">Total Income</p>
             <p className="text-lg font-bold text-green-500">
-              RS {total.income.toFixed(2)}
+              Rs {total.income.toFixed(2)}
             </p>
           </div>
           <div className="text-center">
             <p className="text-muted-foreground">Total Epenses</p>
             <p className="text-lg font-bold text-red-500">
-              RS {total.expense.toFixed(2)}
+              Rs {total.expense.toFixed(2)}
             </p>
           </div>
           <div className="text-center">
@@ -124,7 +124,7 @@ const AccountChart = ({ transactions }) => {
                   : "text-red-500"
               }`}
             >
-              RS {(total.income - total.expense).toFixed(2)}
+              Rs {(total.income - total.expense).toFixed(2)}
             </p>
           </div>
         </div>
@@ -142,7 +142,7 @@ const AccountChart = ({ transactions }) => {
                 axisline={false}
                 tickFormatter={(value) => `Rs${value}`}
               />
-              <Tooltip formatter={(value) => [`Rs. ${value}`, undefined]} />
+              <Tooltip formatter={(value) => [`Rs ${value}`, undefined]} />
               <Legend />
               <Bar
                 dataKey="income"
