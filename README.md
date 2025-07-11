@@ -9,7 +9,6 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?logo=postgresql)](https://www.postgresql.org/)
 [![Clerk](https://img.shields.io/badge/Auth-Clerk-3D4CE8?logo=clerk)](https://clerk.com/)
 [![Google Gemini](https://img.shields.io/badge/AI-Gemini-ff6b81?logo=google)](https://deepmind.google/technologies/gemini/)
-[![License](https://img.shields.io/github/license/MayankGupta0119/GenAI-NextWealthAI)](./LICENSE)
 
 ---
 
